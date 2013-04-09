@@ -171,6 +171,8 @@ LANGOPT(ApplePragmaPack, 1, 0, "Apple gcc-compatible #pragma pack handling")
 
 BENIGN_LANGOPT(RetainCommentsFromSystemHeaders, 1, 0, "retain documentation comments from system headers in the AST")
 
+BENIGN_LANGOPT(N3526, 1, 0, "enables the syntax from proposal N3526")
+
 #undef LANGOPT
 #undef VALUE_LANGOPT
 #undef BENIGN_LANGOPT

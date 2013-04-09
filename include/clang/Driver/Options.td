@@ -658,6 +658,8 @@ def fpie : Flag<["-"], "fpie">, Group<f_Group>;
 def fno_pie : Flag<["-"], "fno-pie">, Group<f_Group>;
 def fprofile_arcs : Flag<["-"], "fprofile-arcs">, Group<f_Group>;
 def fprofile_generate : Flag<["-"], "fprofile-generate">, Group<f_Group>;
+def fproposal_n3526 : Flag<["-"], "fproposal-n3526">, Group<f_Group>, Flags<[CC1Option]>,
+  HelpText<"Enable proposed syntax of N3526">;
 def framework : Separate<["-"], "framework">, Flags<[LinkerInput]>;
 def frandom_seed_EQ : Joined<["-"], "frandom-seed=">, Group<clang_ignored_f_Group>;
 def frtti : Flag<["-"], "frtti">, Group<f_Group>;

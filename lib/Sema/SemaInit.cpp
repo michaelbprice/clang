@@ -25,6 +25,7 @@
 #include "llvm/ADT/SmallString.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/raw_ostream.h"
+#include <algorithm>
 #include <map>
 using namespace clang;
 
@@ -172,6 +173,7 @@ class InitListChecker {
   bool hadError;
   bool VerifyOnly; // no diagnostics, no structure building
   bool AllowBraceElision;
+  bool UseN3526Rules;
   llvm::DenseMap<InitListExpr *, InitListExpr *> SyntacticToSemantic;
   InitListExpr *FullyStructuredList;
 
@@ -471,7 +473,8 @@ InitListChecker::FillInValueInitializations(const InitializedEntity &Entity,
 InitListChecker::InitListChecker(Sema &S, const InitializedEntity &Entity,
                                  InitListExpr *IL, QualType &T,
                                  bool VerifyOnly, bool AllowBraceElision)
-  : SemaRef(S), VerifyOnly(VerifyOnly), AllowBraceElision(AllowBraceElision) {
+  : SemaRef(S), VerifyOnly(VerifyOnly), AllowBraceElision(AllowBraceElision)
+  , UseN3526Rules(SemaRef.LangOpts.N3526) {
   hadError = false;
 
   unsigned newIndex = 0;
@@ -665,6 +668,7 @@ void InitListChecker::CheckExplicitInitList(const InitializedEntity &Entity,
       << IList->getSourceRange()
       << FixItHint::CreateRemoval(IList->getLocStart())
       << FixItHint::CreateRemoval(IList->getLocEnd());
+
 }
 
 void InitListChecker::CheckListElementTypes(const InitializedEntity &Entity,
@@ -1347,6 +1351,19 @@ void InitListChecker::CheckStructUnionTypes(const InitializedEntity &Entity,
   RecordDecl::field_iterator FieldEnd = RD->field_end();
   bool InitializedSomething = false;
   bool CheckForMissingFields = true;
+
+  if (UseN3526Rules) {
+    if (std::distance(Field, FieldEnd) == 1 &&
+        IList->getNumInits() > 1) {
+      InitializedEntity MemberEntity =
+        InitializedEntity::InitializeMember(*Field, &Entity);
+
+      CheckImplicitInitList(MemberEntity, IList, Field->getType(), Index,
+                            StructuredList, StructuredIndex);
+      return;
+    }
+  }
+
   while (Index < IList->getNumInits()) {
     Expr *Init = IList->getInit(Index);
 
